@@ -8,6 +8,7 @@ from termcolor import colored
 import sympy
 import time
 import sys
+from num2words import num2words
 
 engine = pyttsx.init()
 
@@ -195,9 +196,34 @@ def main():
         
     def check_calculator(sent, verbose):
         maths = ["+", "=", "/", "*", "(", ")"]
-        if any(x in sent for x in maths):
-            chopped = re.findall('[0-9()+-=/*]{1,100}', sent)
-            print(chopped)
+        maths2 = ["plus", "minus", "percent of", "times", "subtract", "add", "divide"]
+        maths3 = ["+", "-", "%", "*", "-", "+", "/"]
+        if any(x in sent for x in maths) or any(x in sent for x in maths2):
+            for x in maths2:
+                if x in sent:
+                    foundMath = maths2.index(x)
+                    sent = re.sub(maths2[foundMath], maths3[foundMath], sent)
+            nums = re.sub('[()\55+=*/]', '', sent)
+            try:
+                nums2 = nums.split()
+                nums2Len = len(nums2)
+                nums3 = []
+                for x in range(nums2Len):
+                    try:
+                        nums3.append(text2int(nums2[x]))
+                    except:
+                        continue
+                nums3Len = len(nums3)
+                nums4 = []
+                for x in range(nums3Len):
+                    nums4.append(num2words(nums3[x]))
+                for x in nums4:
+                    if x in sent:
+                        foundWordNum = nums4.index(x)
+                        sent = re.sub(nums4[foundWordNum], str(nums3[foundWordNum]), sent)
+            except:
+                pass
+            chopped = re.findall('[0-9()\55+=*/]+', sent)
             try:
                 chopped = " ".join(chopped)
                 sym = sympy.sympify(chopped)
@@ -210,6 +236,39 @@ def main():
                 if verbose:
                     botPrint(str(sym))
             return True
+
+    def text2int(textnum, numwords={}):
+        if not numwords:
+          units = [
+            "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+            "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+            "sixteen", "seventeen", "eighteen", "nineteen",
+          ]
+
+          tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+
+          scales = ["hundred", "thousand", "million", "billion", "trillion"]
+
+          numwords["and"] = (1, 0)
+          for idx, word in enumerate(units):    numwords[word] = (1, idx)
+          for idx, word in enumerate(tens):     numwords[word] = (1, idx * 10)
+          for idx, word in enumerate(scales):   numwords[word] = (10 ** (idx * 3 or 2), 0)
+
+        textnum = textnum.replace('-', ' ').replace(',', ' ').replace('.', ' ')
+        
+        current = result = 0
+        for word in textnum.split():
+            if word not in numwords:
+              raise Exception("Illegal word: " + word)
+
+            scale, increment = numwords[word]
+            current = current * scale + increment
+            if scale > 100:
+                result += current
+                current = 0
+
+        return result + current
+
     check_calculator(sentH, True)
     
     question_check(sentH)
