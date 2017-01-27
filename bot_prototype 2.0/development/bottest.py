@@ -215,7 +215,7 @@ def main():
                     sent = re.sub(maths2[foundMath], maths3[foundMath], sent)
             nums = re.sub('[()\55+=*/]', 'sep', sent)
             nums = re.sub('[,]', '', nums)
-                         
+            nums = re.sub('[-]', ' ', nums)             
             try:
                 nums2 = nums.split('sep')
                 nums2 = [x.strip(' ') for x in nums2]
