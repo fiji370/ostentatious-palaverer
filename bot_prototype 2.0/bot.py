@@ -116,11 +116,11 @@ def main():
 
     def botPrint(string):
         print("Bot is typing."),
-        time.sleep(0.55)
+        time.sleep(random.choice([0.25, 0.135, 0.55]))
         print("."),
-        time.sleep(0.55)
+        time.sleep(random.choice([0.25, 0.135, 0.55]))
         print("."),
-        time.sleep(0.55)
+        time.sleep(random.choice([0.25, 0.135, 0.55]))
         print(".")
         print("Bot >>> " + string)
     
@@ -216,7 +216,7 @@ def main():
                 nums3Len = len(nums3)
                 nums4 = []
                 for x in range(nums3Len):
-                    nums4.append(num2words(nums3[x]))
+                    nums4.append(num2words(nums3[x]).replace(" ", "-"))
                 for x in nums4:
                     if x in sent:
                         foundWordNum = nums4.index(x)
