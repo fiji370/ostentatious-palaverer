@@ -9,6 +9,7 @@ import sympy
 import time
 import sys
 from num2words import num2words
+import js2py
 
 engine = pyttsx.init()
 
@@ -198,6 +199,7 @@ def main():
         maths = ["+", "=", "/", "*", "(", ")"]
         maths2 = ["plus", "minus", "percent of", "times", "subtract", "add", "divide"]
         maths3 = ["+", "-", "%", "*", "-", "+", "/"]
+
         if any(x in sent for x in maths) or any(x in sent for x in maths2):
             for x in maths2:
                 if x in sent:
@@ -224,6 +226,7 @@ def main():
             except:
                 pass
             chopped = re.findall('[0-9()\55+=*/]+', sent)
+            print(chopped)
             try:
                 chopped = " ".join(chopped)
                 sym = sympy.sympify(chopped)
@@ -236,7 +239,6 @@ def main():
                 if verbose:
                     botPrint(str(sym))
             return True
-
     def text2int(textnum, numwords={}):
         if not numwords:
           units = [
@@ -258,7 +260,7 @@ def main():
         
         current = result = 0
         for word in textnum.split():
-            if word not in numwords:
+            if (word not in numwords):
               raise Exception("Illegal word: " + word)
 
             scale, increment = numwords[word]
