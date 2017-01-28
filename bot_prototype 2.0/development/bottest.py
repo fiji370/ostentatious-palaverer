@@ -209,37 +209,50 @@ def main():
         maths3 = ["+", "-", "%", "*", "-", "+", "/"]
         
         if any(x in sent for x in maths) or any(x in sent for x in maths2):
-            for x in maths2:
+            for x in maths:
                 if x in sent:
-                    foundMath = maths2.index(x)
-                    sent = re.sub(maths2[foundMath], maths3[foundMath], sent)
-            nums = re.sub('[()\55+=*/]', 'sep', sent)
-            nums = re.sub('[,]', '', nums)
-            nums = re.sub('[-]', ' ', nums)             
-            try:
-                nums2 = nums.split('sep')
-                nums2 = [x.strip(' ') for x in nums2]
-                print(nums2)
-                nums2Len = len(nums2)
-                nums3 = []
-                for x in range(nums2Len):
+                    print("bob")
+                    pass
+                else:
+                    for x in maths2:
+                        if x in sent:
+                            foundMath = maths2.index(x)
+                            sent = re.sub(maths2[foundMath], maths3[foundMath], sent)
+
+                    nums = re.sub('[()+=*/]', 'sep', sent)
+                    nums = re.sub('[,]', '', nums)
+                    if not(" - " in nums):
+                        nums = nums.replace("-", " ")
+                    else:
+                        nums = re.sub('[-]', 'sep', nums)
                     try:
-                        nums3.append(jsConvert(nums2[x]))
+                        nums2 = nums.split('sep')
+                        nums2 = [x.strip(' ') for x in nums2]
+                        nums2Len = len(nums2)
+                        nums3 = []
+                        for x in range(nums2Len):
+                            try:
+                                nums3.append(jsConvert(nums2[x]))
+                            except:
+                                continue
+                        nums3Len = len(nums3)
+                        if nums3Len > 0:
+                            nums4 = []
+                            for x in range(nums3Len):
+                                nums4.append(num2words(nums3[x]).replace(",", "").replace("-", " ").replace(" and ", " "))
+                                
+                            if not(" - " in sent):
+                                sent = sent.replace("-", " ")
+                            sent = sent.replace(",", "")
+                            sent = sent.replace(" and ", " ")
+                            for x in nums4:
+                                if x in sent:
+                                    foundWordNum = nums4.index(x)
+                                    sent = re.sub(nums4[foundWordNum], str(nums3[foundWordNum]), sent)
                     except:
-                        continue
-                nums3Len = len(nums3)
-                print(nums3)
-                nums4 = []
-                for x in range(nums3Len):
-                    nums4.append(re.sub("[-]", " ", re.sub("[,]", "", num2words(nums3[x]))))
-                print(nums4)
-                for x in nums4:
-                    if x in sent:
-                        foundWordNum = nums4.index(x)
-                        sent = re.sub(nums4[foundWordNum], str(nums3[foundWordNum]), sent)
-            except:
-                pass
-            chopped = re.findall('[0-9()\55+=*/]+', sent)
+                        pass
+
+            chopped = re.findall('[0-9()+=*/-]+', sent)
             print(chopped)
             try:
                 chopped = " ".join(chopped)

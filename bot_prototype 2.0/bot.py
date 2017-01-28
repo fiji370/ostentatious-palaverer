@@ -11,6 +11,14 @@ import sys
 from num2words import num2words
 import js2py
 
+js2py.translate_file('convert.js', 'convert.py')
+
+from convert import convert
+
+global jsConvert
+
+jsConvert = convert.text2num
+
 engine = pyttsx.init()
 
 def write_file():
@@ -196,36 +204,55 @@ def main():
 
         
     def check_calculator(sent, verbose):
-        maths = ["+", "=", "/", "*", "(", ")"]
+        maths = ["+", "=", "/", "*", "(", ")", "-"]
         maths2 = ["plus", "minus", "percent of", "times", "subtract", "add", "divide"]
         maths3 = ["+", "-", "%", "*", "-", "+", "/"]
-
+        
         if any(x in sent for x in maths) or any(x in sent for x in maths2):
-            for x in maths2:
+            for x in maths:
                 if x in sent:
-                    foundMath = maths2.index(x)
-                    sent = re.sub(maths2[foundMath], maths3[foundMath], sent)
-            nums = re.sub('[()\55+=*/]', '', sent)
-            try:
-                nums2 = nums.split()
-                nums2Len = len(nums2)
-                nums3 = []
-                for x in range(nums2Len):
+                    print("bob")
+                    pass
+                else:
+                    for x in maths2:
+                        if x in sent:
+                            foundMath = maths2.index(x)
+                            sent = re.sub(maths2[foundMath], maths3[foundMath], sent)
+
+                    nums = re.sub('[()+=*/]', 'sep', sent)
+                    nums = re.sub('[,]', '', nums)
+                    if not(" - " in nums):
+                        nums = nums.replace("-", " ")
+                    else:
+                        nums = re.sub('[-]', 'sep', nums)
                     try:
-                        nums3.append(text2int(nums2[x]))
+                        nums2 = nums.split('sep')
+                        nums2 = [x.strip(' ') for x in nums2]
+                        nums2Len = len(nums2)
+                        nums3 = []
+                        for x in range(nums2Len):
+                            try:
+                                nums3.append(jsConvert(nums2[x]))
+                            except:
+                                continue
+                        nums3Len = len(nums3)
+                        if nums3Len > 0:
+                            nums4 = []
+                            for x in range(nums3Len):
+                                nums4.append(num2words(nums3[x]).replace(",", "").replace("-", " ").replace(" and ", " "))
+                                
+                            if not(" - " in sent):
+                                sent = sent.replace("-", " ")
+                            sent = sent.replace(",", "")
+                            sent = sent.replace(" and ", " ")
+                            for x in nums4:
+                                if x in sent:
+                                    foundWordNum = nums4.index(x)
+                                    sent = re.sub(nums4[foundWordNum], str(nums3[foundWordNum]), sent)
                     except:
-                        continue
-                nums3Len = len(nums3)
-                nums4 = []
-                for x in range(nums3Len):
-                    nums4.append(num2words(nums3[x]).replace(" ", "-"))
-                for x in nums4:
-                    if x in sent:
-                        foundWordNum = nums4.index(x)
-                        sent = re.sub(nums4[foundWordNum], str(nums3[foundWordNum]), sent)
-            except:
-                pass
-            chopped = re.findall('[0-9()\55+=*/]+', sent)
+                        pass
+
+            chopped = re.findall('[0-9()+=*/-]+', sent)
             print(chopped)
             try:
                 chopped = " ".join(chopped)
@@ -239,37 +266,6 @@ def main():
                 if verbose:
                     botPrint(str(sym))
             return True
-    def text2int(textnum, numwords={}):
-        if not numwords:
-          units = [
-            "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-            "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-            "sixteen", "seventeen", "eighteen", "nineteen",
-          ]
-
-          tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
-
-          scales = ["hundred", "thousand", "million", "billion", "trillion"]
-
-          numwords["and"] = (1, 0)
-          for idx, word in enumerate(units):    numwords[word] = (1, idx)
-          for idx, word in enumerate(tens):     numwords[word] = (1, idx * 10)
-          for idx, word in enumerate(scales):   numwords[word] = (10 ** (idx * 3 or 2), 0)
-
-        textnum = textnum.replace('-', ' ').replace(',', ' ').replace('.', ' ')
-        
-        current = result = 0
-        for word in textnum.split():
-            if (word not in numwords):
-              raise Exception("Illegal word: " + word)
-
-            scale, increment = numwords[word]
-            current = current * scale + increment
-            if scale > 100:
-                result += current
-                current = 0
-
-        return result + current
 
     check_calculator(sentH, True)
     
