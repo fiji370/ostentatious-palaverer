@@ -211,7 +211,6 @@ def main():
         if any(x in sent for x in maths) or any(x in sent for x in maths2):
             for x in maths:
                 if x in sent:
-                    print("bob")
                     pass
                 else:
                     for x in maths2:
